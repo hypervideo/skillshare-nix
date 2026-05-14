@@ -58,7 +58,10 @@ ASSETS=(
 WORK_DIR=$(mktemp -d)
 trap 'rm -rf "$WORK_DIR"' EXIT
 
-declare -A HASHES
+x86_64_darwin_hash=""
+aarch64_darwin_hash=""
+x86_64_linux_hash=""
+aarch64_linux_hash=""
 
 for index in "${!SYSTEMS[@]}"; do
   system="${SYSTEMS[$index]}"
@@ -73,39 +76,46 @@ for index in "${!SYSTEMS[@]}"; do
 
   echo "Downloading ${asset}..."
   curl -sfL "$url" -o "$WORK_DIR/$asset"
-  HASHES[$system]=$(nix hash path --mode flat "$WORK_DIR/$asset")
+  hash=$(nix hash path --mode flat "$WORK_DIR/$asset")
+
+  case "$system" in
+    x86_64-darwin) x86_64_darwin_hash="$hash" ;;
+    aarch64-darwin) aarch64_darwin_hash="$hash" ;;
+    x86_64-linux) x86_64_linux_hash="$hash" ;;
+    aarch64-linux) aarch64_linux_hash="$hash" ;;
+  esac
 done
 
 awk \
   -v oldVersion="$CURRENT_VERSION" \
   -v newVersion="$LATEST_VERSION" \
-  -v x86_64_darwin="${HASHES[x86_64-darwin]}" \
-  -v aarch64_darwin="${HASHES[aarch64-darwin]}" \
-  -v x86_64_linux="${HASHES[x86_64-linux]}" \
-  -v aarch64_linux="${HASHES[aarch64-linux]}" \
+  -v x86_64_darwin="$x86_64_darwin_hash" \
+  -v aarch64_darwin="$aarch64_darwin_hash" \
+  -v x86_64_linux="$x86_64_linux_hash" \
+  -v aarch64_linux="$aarch64_linux_hash" \
   '
     {
       gsub("version = \"" oldVersion "\"", "version = \"" newVersion "\"")
     }
 
-    /"x86_64-darwin" = fetchurl/ { system = "x86_64-darwin" }
-    /"aarch64-darwin" = fetchurl/ { system = "aarch64-darwin" }
-    /"x86_64-linux" = fetchurl/ { system = "x86_64-linux" }
-    /"aarch64-linux" = fetchurl/ { system = "aarch64-linux" }
+    /"x86_64-darwin" = fetchurl/ { currentSystem = "x86_64-darwin" }
+    /"aarch64-darwin" = fetchurl/ { currentSystem = "aarch64-darwin" }
+    /"x86_64-linux" = fetchurl/ { currentSystem = "x86_64-linux" }
+    /"aarch64-linux" = fetchurl/ { currentSystem = "aarch64-linux" }
 
     /hash = "/ {
-      if (system == "x86_64-darwin") {
+      if (currentSystem == "x86_64-darwin") {
         sub(/hash = "[^"]*"/, "hash = \"" x86_64_darwin "\"")
-        system = ""
-      } else if (system == "aarch64-darwin") {
+        currentSystem = ""
+      } else if (currentSystem == "aarch64-darwin") {
         sub(/hash = "[^"]*"/, "hash = \"" aarch64_darwin "\"")
-        system = ""
-      } else if (system == "x86_64-linux") {
+        currentSystem = ""
+      } else if (currentSystem == "x86_64-linux") {
         sub(/hash = "[^"]*"/, "hash = \"" x86_64_linux "\"")
-        system = ""
-      } else if (system == "aarch64-linux") {
+        currentSystem = ""
+      } else if (currentSystem == "aarch64-linux") {
         sub(/hash = "[^"]*"/, "hash = \"" aarch64_linux "\"")
-        system = ""
+        currentSystem = ""
       }
     }
 
