@@ -6,27 +6,27 @@
 
 let
   pname = "skillshare";
-  version = "0.24.6";
+  version = "0.25.0";
 
   sources = {
     "x86_64-darwin" = fetchurl {
       url = "https://github.com/runkids/skillshare/releases/download/v${version}/skillshare_${version}_darwin_amd64.tar.gz";
-      hash = "sha256-802Wh+Lrw1WlUC3OZILvKuidNXd5LPbMY3EqNrEgoWk=";
+      hash = "sha256-2sHl58U5OQPIiLPWAVANvAgqMp7CsTLPPWw6UXmWZtQ=";
     };
 
     "aarch64-darwin" = fetchurl {
       url = "https://github.com/runkids/skillshare/releases/download/v${version}/skillshare_${version}_darwin_arm64.tar.gz";
-      hash = "sha256-KXzK79OuBgyrn55L0RkLUp7VtnuabS8ZI+3mhHaY/H4=";
+      hash = "sha256-T++RL8aqguxxw6+np4J7yb3Q5OKJF//03CHuR9TdziY=";
     };
 
     "x86_64-linux" = fetchurl {
       url = "https://github.com/runkids/skillshare/releases/download/v${version}/skillshare_${version}_linux_amd64.tar.gz";
-      hash = "sha256-YIQ3mM6xWRZbx3uwMmgvneTKNFQAC1nw00FUlV95CZo=";
+      hash = "sha256-zNMfSwXvnr+2+VDZTwv3jigFe81FjgbaUBSe7xT/F6k=";
     };
 
     "aarch64-linux" = fetchurl {
       url = "https://github.com/runkids/skillshare/releases/download/v${version}/skillshare_${version}_linux_arm64.tar.gz";
-      hash = "sha256-07KRiHntmhX1IC5l9HNjkmMuDvFoRUjAsxPRS/9rZIY=";
+      hash = "sha256-SxW98xkRFtdtrw/GuXZPEbkT8WHmBNizz1kRnKGq/3k=";
     };
   };
 
