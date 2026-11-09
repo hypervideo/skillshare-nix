@@ -15,7 +15,8 @@ fi
 
 echo "Current version: $CURRENT_VERSION"
 
-curl_args=(-sfL)
+# GitHub sometimes returns 5xx errors for releases and their assets.
+curl_args=(-sfL --retry 5 --retry-all-errors)
 if [ -n "${GITHUB_TOKEN:-${GH_TOKEN:-}}" ]; then
   curl_args+=(
     -H "Authorization: Bearer ${GITHUB_TOKEN:-$GH_TOKEN}"
@@ -75,8 +76,11 @@ for index in "${!SYSTEMS[@]}"; do
   fi
 
   echo "Downloading ${asset}..."
-  curl -sfL "$url" -o "$WORK_DIR/$asset"
+  curl -sfL --retry 5 --retry-all-errors "$url" -o "$WORK_DIR/$asset"
   hash=$(nix hash path --mode flat "$WORK_DIR/$asset")
+  # Adding the file gives it the same store path as the fetchurl source,
+  # so the following nix build uses it and does not download it again.
+  nix store add-file "$WORK_DIR/$asset" >/dev/null
 
   case "$system" in
     x86_64-darwin) x86_64_darwin_hash="$hash" ;;
